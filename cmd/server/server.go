@@ -28,11 +28,12 @@ func (s *server) Remind(stream common.ReminderService_RemindServer) error {
 			return err
 		}
 
-		log.Printf("Ready to remind: %s", in.Note)
+		log.Printf("Ready to remind: %v", in)
 
 		go func() {
 			for {
 				time.Sleep(5 * time.Minute)
+				log.Printf("sending reminder %v", in)
 				stream.Send(in)
 			}
 		}()

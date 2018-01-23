@@ -19,8 +19,6 @@ message Reminder {
     string ID = 1;
     // The name of the feature.
     string note = 2;
-}
 
-message IDResponse {
-    string ID = 1;
+    string nodeID =3;
 }

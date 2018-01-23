@@ -6,6 +6,9 @@ import (
 	"google.golang.org/grpc"
 	"github.com/craigivy/grem/pkg/common"
 	"io"
+	"math/rand"
+	"time"
+	"strconv"
 )
 
 const (
@@ -26,10 +29,15 @@ func main() {
 
 func remind(client common.ReminderServiceClient) {
 
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	nodeID := strconv.Itoa(r1.Intn(100))
+	log.Printf("I'm node %s", nodeID)
+
 	reminders := []*common.Reminder{
-		{"1", "First reminder"},
-		{"2", "Second reminder"},
-		{"3", "Third reminder"},
+		{"1", "First reminder", nodeID},
+		{"2", "Second reminder",  nodeID},
+		{"3", "Third reminder",  nodeID},
 	}
 
 	stream, err := client.Remind(context.Background())
@@ -48,7 +56,7 @@ func remind(client common.ReminderServiceClient) {
 			if err != nil {
 				log.Fatalf("Failed to receive a reminder : %v", err)
 			}
-			log.Printf("Got reminder %s with ID(%s)", in.Note, in.ID)
+			log.Printf("Got reminder %s for (%s)", in.Note, in.NodeID)
 		}
 	}()
 
