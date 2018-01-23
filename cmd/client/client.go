@@ -1,11 +1,9 @@
 package main
 
 import (
-"log"
-"os"
-
-"golang.org/x/net/context"
-"google.golang.org/grpc"
+	"log"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 	"github.com/craigivy/grem/pkg/common"
 	"io"
 )
@@ -23,18 +21,6 @@ func main() {
 	}
 	defer conn.Close()
 	c := common.NewReminderServiceClient(conn)
-
-	// Contact the server and print out its response.
-	name := defaultName
-	if len(os.Args) > 1 {
-		name = os.Args[1]
-	}
-	r, err := c.SetReminder(context.Background(), &common.Reminder{ID: "1", Note: name})
-	if err != nil {
-		log.Fatalf("could not greet: %v", err)
-	}
-	log.Printf("Greeting: %s", r.ID)
-
 	remind(c)
 }
 
@@ -46,7 +32,7 @@ func remind(client common.ReminderServiceClient) {
 		{"3", "Third reminder"},
 	}
 
-	stream, err := client.Watch(context.Background())
+	stream, err := client.Remind(context.Background())
 	if err != nil {
 		log.Fatalf("error client: %v, err: %v", client, err)
 	}

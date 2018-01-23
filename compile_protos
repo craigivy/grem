@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# This is sort of a trick to get protoc to output Go files that have the correct
+# import paths
+ROOT="${GOPATH}/src"
+WD=`pwd`
+
+# Find all .proto files in the project and compile them
+for dir in $(find . -name '*.proto' -exec dirname {} \; | sort | uniq) ; do
+  protoc -I "${ROOT}" "$WD/$dir"/*.proto --go_out=plugins=grpc:${ROOT}
+done

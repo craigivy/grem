@@ -1,0 +1,26 @@
+
+
+syntax = "proto3";
+
+package common;
+
+// Interface exported by the server.
+service ReminderService {
+    rpc remind(stream Reminder) returns (stream Reminder) {}
+
+}
+
+
+// A feature names something at a given point.
+//
+// If a feature could not be named, the name is empty.
+message Reminder {
+    // The name of the feature.
+    string ID = 1;
+    // The name of the feature.
+    string note = 2;
+}
+
+message IDResponse {
+    string ID = 1;
+}
