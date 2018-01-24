@@ -5,7 +5,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"github.com/craigivy/grem/pkg/common"
-	"io"
 	"math/rand"
 	"time"
 	"strconv"
@@ -25,6 +24,10 @@ func main() {
 	defer conn.Close()
 	c := common.NewReminderServiceClient(conn)
 	remind(c)
+
+	forever := make(chan struct{})
+	<-forever
+
 }
 
 func remind(client common.ReminderServiceClient) {
@@ -42,34 +45,17 @@ func remind(client common.ReminderServiceClient) {
 
 	stream, err := client.Remind(context.Background())
 	if err != nil {
-		log.Fatalf("error client: %v, err: %v", client, err)
-	}
-	waitc := make(chan struct{})
-	go func() {
-		for {
-			in, err := stream.Recv()
-			if err == io.EOF {
-				// read done.
-				close(waitc)
-				return
-			}
-			if err != nil {
-				log.Fatalf("Failed to receive a reminder : %v", err)
-			}
-			log.Printf("Got reminder %s for (%s)", in.Note, in.NodeID)
-		}
-	}()
-
-	for _, reminder := range reminders {
-		if err := stream.Send(reminder); err != nil {
-			log.Fatalf("Failed to send a reminder: %v", err)
-		}
-		log.Printf("reminder sent: %v", reminder)
+		log.Fatalf("failed to listen: %v", err)
 	}
 
-	forever := make(chan struct{})
-	<-forever
+	cep := common.NewClientEndpoint(stream)
 
-	stream.CloseSend()
-	<-waitc
+	for {
+		err := cep.Send(reminders[0])
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+		time.Sleep(5 * time.Second)
+	}
+
 }
